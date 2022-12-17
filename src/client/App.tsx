@@ -2,7 +2,14 @@ import * as React from 'react';
 import { BrowserRouter, Routes, Route } from 'react-router-dom'
 import { useState, useEffect } from 'react';
 import * as path from 'path'
+
+
 import Home from './components/Home';
+import OneChirp from './components/OneChirp';
+import Navbar from './components/Navbar'
+import ChirpCard from './components/ChirpCard';
+import { ChirpCardProps } from './components/ChirpCard';
+import EditChirp from './components/EditChirp';
 
 
 
@@ -13,15 +20,19 @@ import Home from './components/Home';
 const App = () => {
 	return (
 	  <BrowserRouter>
+	  <Navbar />
 		<main className="container mt-5">
 		  <section className="row justify-content-center">
 			<Routes>
 			  <Route path="" element={<Home />}></Route>
+			  <Route path="/chirps/:id" element={<OneChirp />}></Route>
+			  <Route path="/chirps/:id/edit" element={<EditChirp />}></Route>
 			 
 			  <Route path="*" element={<h1>404 Not Found</h1>}></Route>
 			</Routes>
 		  </section>
 		</main>
+		
 	  </BrowserRouter>
 	)
 	

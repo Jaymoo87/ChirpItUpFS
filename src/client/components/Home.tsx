@@ -1,39 +1,64 @@
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import React, { useEffect, useState} from "react";
 import { v4 as uuidv4 } from 'uuid';
 import moment from 'moment'
 import { RiChatFollowUpFill  } from 'react-icons/ri'
 
 import { IChirp } from "../types";
+import OneChirp from "./OneChirp";
+import ChirpCard from "./ChirpCard";
+
+
+const maxChars = 280
+
+
 
 const Home = () => {
-
-  const [message, setMessage] = useState<string>("");
+  
+  const nav = useNavigate();
+  const [content, setContent] = useState<string>("");
   const [username, setUsername] = useState<string>('');
   const [chirps, setChirps] = useState<IChirp[]>([]);
-
   
+  
+  const handleSubmitChirp = () => {
+    if (!content) return alert('write a message dummy')
+
+    fetch(`/db/chirps/`, {
+      method: 'POST',
+      headers: {
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify(content),
+    })
+    .then(res => res.json())
+    .then(data => {
+      nav(`db/chirps/${data.id}`)
+    })
+  }
   const handleChirpInput = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
-    setMessage(e.target.value);
+    setContent(e.target.value);
   };
   const handleUserInput = (e: React.ChangeEvent<HTMLInputElement>) => {
   setUsername(e.target.value);
 };
 const handleButtonClick = (e: React.MouseEvent<HTMLButtonElement>) => {
-  if (message === "" || username === "") {
+
+
+  if (content === "" || username === "") {
     alert("Missing some Input");
     e.preventDefault();
   } else {
     e.preventDefault();
-    setChirps([...chirps, { userid: uuidv4(), username, content: 'hey' }]);
+    setChirps([{userid: username, username, content }, ...chirps]);
     setUsername('');
-    setMessage("");
+    setContent("");
     setUsername("");
   }
 };
 
 useEffect(() => {
-  fetch("/api/chirps")
+  fetch("/db/chirps")
     .then(res => res.json())
     .then(data => setChirps(data))
     .catch((e) => alert(e.message));
@@ -55,11 +80,11 @@ useEffect(() => {
           <textarea
             className="form-control bg-light p-3 text-muted"
             placeholder="Chirp Here"
-            value={message}
+            value={content}
             onChange={handleChirpInput}
           />
           <div className="d-flex justify-content-end">
-            <button onClick={handleButtonClick} className="btn btn-success m-3" id="chirpButton">
+            <button onClick={handleButtonClick} className="btn btn-primary border border-dark m-3 shadow-md" id="chirpButton">
               Chirp Chirp
             </button>
           </div>
@@ -67,28 +92,8 @@ useEffect(() => {
       </div>
       <div className="row justify-content-center">
         {chirps.map(c  => (
-          <div key={`chrp-${c.userid}`} className="col-12 col-md-6 offset-1 mt-4">
-            <div className="mb-2 card shadow-lg">
-              <span className=" d-flex justify-content-end text-muted card-text fst-italic fw-lighter mx-3 mt-1">
-                {moment().toNow()}
-              </span>
-              <div className="card-body col-12"></div>
-              <h3 className="card-title mx-5 ">
-                {c.username} 
-              </h3>
-
-              <p className=" m-5 card-text ">{c.content}</p>
-              <div className="d-flex justify-content-between mx-2">
-                <h6 className=" text-muted d-flex card-text fst-italic">{moment().format("LLLL")} </h6>
-                <h6 className=" text-muted d-flex card-text fst-italic">
-                 
-                  {c.username}
-                  
-                  <RiChatFollowUpFill />
-                </h6>
-              </div>
-            </div>
-          </div>
+          <ChirpCard chirp={c} key={`chrp-${c.id}`}  />
+          
         ))}
       </div>
     </main>

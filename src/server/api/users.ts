@@ -1,5 +1,6 @@
 import { Query } from './index'
 
+
 interface IUsers {
     id?: number,
     name?: string,
